@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Vinayaga Parking</title>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5ede0;
+            color: #2d1a0e;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            animation: fadeDown 0.8s ease;
+        }
+
+        .ganesh-img {
+            width: 250px;
+            height: 250px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 16px rgba(180,100,0,0.15));
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #7c3a00;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: #b07840;
+            margin-top: 4px;
+        }
+
+        /* Token badge */
+        .token-badge {
+            background: rgba(180,100,0,0.08);
+            border: 1px solid rgba(180,100,0,0.15);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 13px;
+            color: #b07840;
+            margin-bottom: 28px;
+            animation: fadeUp 0.8s ease 0.2s both;
+        }
+
+        .token-badge span {
+            color: #c45c00;
+            font-weight: 700;
+        }
+
+        /* Card */
+        .card {
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(180,100,0,0.12);
+            border-radius: 24px;
+            padding: 28px;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            animation: fadeUp 0.8s ease 0.3s both;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 24px rgba(180,100,0,0.08);
+        }
+
+        .card label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #b07840;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            opacity: 0.5;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            background: rgba(255,255,255,0.8);
+            border: 1.5px solid rgba(180,100,0,0.15);
+            border-radius: 14px;
+            color: #2d1a0e;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(45,26,14,0.25);
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        input:focus {
+            border-color: #c45c00;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(196,92,0,0.1);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #c45c00, #e8900a);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 16px rgba(196,92,0,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(196,92,0,0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-scan {
+            width: 100%;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            background: rgba(196,92,0,0.08);
+            border: 1px solid rgba(196,92,0,0.2);
+            border-radius: 14px;
+            color: #c45c00;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-scan:hover {
+            background: rgba(196,92,0,0.12);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            background: rgba(180,100,0,0.06);
+            border: 1px solid rgba(180,100,0,0.15);
+            border-radius: 14px;
+            color: #b07840;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeUp 0.8s ease 0.4s both;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(180,100,0,0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Camera */
+        video {
+            width: 100%;
+            border-radius: 14px;
+            margin-top: 10px;
+            display: none;
+            border: 1.5px solid rgba(196,92,0,0.2);
+        }
+
+        canvas { display: none; }
+
+        #scanStatus {
+            text-align: center;
+            color: #b07840;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* Token Preview */
+        .token-preview {
+            width: 100%;
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(180,100,0,0.12);
+            border-radius: 24px;
+            padding: 28px;
+            display: none;
+            animation: fadeUp 0.5s ease;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 24px rgba(180,100,0,0.08);
+        }
+
+        .token-preview.show {
+            display: block;
+        }
+
+        .token-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .token-header h2 {
+            font-size: 12px;
+            font-weight: 700;
+            color: #b07840;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .token-number {
+            font-size: 52px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #c45c00, #e8900a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(180,100,0,0.1);
+            margin: 16px 0;
+        }
+
+        .token-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .token-row .key {
+            font-size: 12px;
+            color: #b07840;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .token-row .value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2d1a0e;
+            letter-spacing: 0.5px;
+        }
+
+        .charges-box {
+            background: rgba(196,92,0,0.06);
+            border: 1px solid rgba(196,92,0,0.15);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-top: 16px;
+        }
+
+        .charges-box p {
+            font-size: 11px;
+            color: #b07840;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .charge-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .charge-row span:first-child {
+            font-size: 13px;
+            color: #7c3a00;
+        }
+
+        .charge-row span:last-child {
+            font-size: 13px;
+            font-weight: 700;
+            color: #c45c00;
+        }
+
+        .thank-you {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #b07840;
+        }
+
+        /* Animations */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .flash {
+            animation: flash 0.5s ease;
+        }
+
+        @keyframes flash {
+            0% { box-shadow: 0 0 0 0 rgba(196,92,0,0.4); }
+            50% { box-shadow: 0 0 40px 10px rgba(196,92,0,0.15); }
+            100% { box-shadow: 0 0 0 0 rgba(196,92,0,0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <img src="ganesh.png.png" alt="Lord Vinayaga" class="ganesh-img" />
+        <h1>Sri Vinayaga Parking</h1>
+        <p>Two Wheeler Stand — Token System</p>
+    </div>
+
+    <div class="token-badge">
+        Next Token: <span id="badgeToken">0001</span>
+    </div>
+
+    <!-- Token Preview -->
+    <div class="token-preview" id="tokenPreview">
+        <div class="token-header">
+            <h2>Token Generated</h2>
+            <div class="token-number" id="displayToken">0001</div>
+        </div>
+        <div class="divider"></div>
+        <div class="token-row">
+            <span class="key">Vehicle</span>
+            <span class="value" id="displayVehicle">—</span>
+        </div>
+        <div class="token-row">
+            <span class="key">Entry</span>
+            <span class="value" id="displayDate">—</span>
+        </div>
+        <div class="token-row">
+            <span class="key">Time</span>
+            <span class="value" id="displayTime">—</span>
+        </div>
+        <div class="charges-box">
+            <p>Charges</p>
+            <div class="charge-row">
+                <span>12 Hours</span>
+                <span>Rs. 20</span>
+            </div>
+            <div class="charge-row">
+                <span>24 Hours</span>
+                <span>Rs. 40</span>
+            </div>
+        </div>
+        <div class="thank-you">Thank you! Drive Safe 🙏</div>
+    </div>
+
+    <!-- Input Card -->
+    <div class="card">
+        <label>Vehicle Number</label>
+        <div class="input-wrapper">
+            <span class="input-icon">🚗</span>
+            <input type="text" id="vehicleInput" placeholder="TN 58 AB 1234" />
+        </div>
+
+        <button class="btn-scan" id="scanBtn" onclick="startScan()">
+            📷 Scan Number Plate
+        </button>
+
+        <video id="camera" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        <p id="scanStatus"></p>
+
+        <button class="btn-primary" onclick="generateToken()">
+            Generate Token 🖨
+        </button>
+    </div>
+
+    <button class="btn-secondary" onclick="resetToken()">
+        🔄 New Roll — Reset Token Number
+    </button>
+
+</div>
+
+<script>
+    let tokenNumber = parseInt(localStorage.getItem("tokenNumber")) || 1;
+    updateBadge();
+
+    function pad(num) {
+        return String(num).padStart(4, '0');
+    }
+
+    function updateBadge() {
+        document.getElementById("badgeToken").innerText = pad(tokenNumber);
+    }
+
+    function generateToken() {
+        const vehicle = document.getElementById("vehicleInput").value.toUpperCase().trim();
+        if (!vehicle) {
+            alert("Please enter vehicle number!");
+            return;
+        }
+
+        const now = new Date();
+        const date = now.toLocaleDateString("en-IN");
+        const time = now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
+
+        document.getElementById("displayToken").innerText = pad(tokenNumber);
+        document.getElementById("displayVehicle").innerText = vehicle;
+        document.getElementById("displayDate").innerText = date;
+        document.getElementById("displayTime").innerText = time;
+
+        const preview = document.getElementById("tokenPreview");
+        preview.classList.add("show");
+        preview.classList.remove("flash");
+        void preview.offsetWidth;
+        preview.classList.add("flash");
+
+        tokenNumber++;
+        localStorage.setItem("tokenNumber", tokenNumber);
+        updateBadge();
+        document.getElementById("vehicleInput").value = "";
+        document.getElementById("vehicleInput").focus();
+    }
+
+    function resetToken() {
+        if (confirm("Are you sure you want to reset?\nThis will start token number from 0001!")) {
+            tokenNumber = 1;
+            localStorage.setItem("tokenNumber", 1);
+            updateBadge();
+            document.getElementById("tokenPreview").classList.remove("show");
+            alert("Token number reset to 0001!");
+        }
+    }
+
+    async function startScan() {
+        const video = document.getElementById("camera");
+        const scanBtn = document.getElementById("scanBtn");
+        const scanStatus = document.getElementById("scanStatus");
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }
+        });
+
+        video.srcObject = stream;
+        video.style.display = "block";
+        scanStatus.style.display = "block";
+        scanStatus.innerText = "Point camera at number plate...";
+
+        scanBtn.innerText = "📸 Capture";
+        scanBtn.onclick = async function () {
+            const canvas = document.getElementById("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0);
+
+            stream.getTracks().forEach(track => track.stop());
+            video.style.display = "none";
+
+            scanStatus.innerText = "Reading number plate...";
+
+            const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
+            const cleaned = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+            if (cleaned.length > 3) {
+                document.getElementById("vehicleInput").value = cleaned;
+                scanStatus.innerText = "✅ Number plate detected!";
+            } else {
+                scanStatus.innerText = "❌ Could not read. Please type manually.";
+            }
+
+            scanBtn.innerText = "📷 Scan Number Plate";
+            scanBtn.onclick = startScan;
+        };
+    }
+
+    document.getElementById("vehicleInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") generateToken();
+    });
+</script>
+
+</body>
+</html>
