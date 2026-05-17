@@ -296,7 +296,7 @@
 
         .charges-box {
             background: rgba(196,92,0,0.06);
-            border: 1px solid rgba(196,92,0,0.15);
+            border: 1px solid rgba(2, 2, 2, 0.15);
             border-radius: 12px;
             padding: 14px 16px;
             margin-top: 16px;
@@ -433,6 +433,21 @@
 
 <script>
     let tokenNumber = parseInt(localStorage.getItem("tokenNumber")) || 1;
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbzP7DieVA-n0e4GGCFT626gpevYSzNrMjqU7NPUcez24wJtZ8nqHXdkjXpfQGgPjOyF/exec";
+
+async function saveToSheet(tokenNo, vehicleNumber, date, time) {
+    try {
+        await fetch(SHEET_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tokenNo, vehicleNumber, date, time })
+        });
+        console.log("Saved to Google Sheets!");
+    } catch (err) {
+        console.log("Offline — will sync later");
+    }
+}
     updateBadge();
 
     function pad(num) {
@@ -465,6 +480,7 @@
         void preview.offsetWidth;
         preview.classList.add("flash");
 
+        saveToSheet(pad(tokenNumber), vehicle, date, time);
         tokenNumber++;
         localStorage.setItem("tokenNumber", tokenNumber);
         updateBadge();
