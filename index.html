@@ -483,49 +483,86 @@
     }
 
     async function startScan() {
-        const video = document.getElementById("camera");
-        const scanBtn = document.getElementById("scanBtn");
-        const scanStatus = document.getElementById("scanStatus");
+    const video = document.getElementById("camera");
+    const scanBtn = document.getElementById("scanBtn");
+    const scanStatus = document.getElementById("scanStatus");
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" }
+    const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }
+    });
+
+    video.srcObject = stream;
+    video.style.display = "block";
+    scanStatus.style.display = "block";
+    scanStatus.innerText = "Point camera at number plate...";
+
+    scanBtn.innerText = "📸 Capture";
+    scanBtn.onclick = async function () {
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw original image
+        ctx.drawImage(video, 0, 0);
+
+        // Preprocess — grayscale + contrast boost
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            // Grayscale
+            const avg = (data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114);
+            
+            // Contrast boost — push darks darker, lights lighter
+            const contrast = 1.8;
+            const factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255));
+            const newVal = Math.min(255, Math.max(0, factor * (avg - 128) + 128));
+
+            data[i] = newVal;
+            data[i+1] = newVal;
+            data[i+2] = newVal;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        // Stop camera
+        stream.getTracks().forEach(track => track.stop());
+        video.style.display = "none";
+
+        scanStatus.innerText = "🔍 Reading number plate...";
+
+        // Run OCR with whitelist
+        const { data: { text } } = await Tesseract.recognize(canvas, 'eng', {
+            tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
         });
 
-        video.srcObject = stream;
-        video.style.display = "block";
-        scanStatus.style.display = "block";
-        scanStatus.innerText = "Point camera at number plate...";
+        console.log("Raw OCR text:", text);
 
-        scanBtn.innerText = "📸 Capture";
-        scanBtn.onclick = async function () {
-            const canvas = document.getElementById("canvas");
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext("2d").drawImage(video, 0, 0);
+        // Clean text
+        const cleaned = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        console.log("Cleaned text:", cleaned);
 
-            stream.getTracks().forEach(track => track.stop());
-            video.style.display = "none";
+        // Indian number plate regex
+        // Format: XX00XX0000 (e.g. TN99AF0800)
+        const plateRegex = /[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}/g;
+        const matches = cleaned.match(plateRegex);
 
-            scanStatus.innerText = "Reading number plate...";
+        if (matches && matches.length > 0) {
+            const plate = matches[0];
+            // Format: TN 99 AF 0800
+            const formatted = plate.slice(0,2) + ' ' + plate.slice(2,4) + ' ' + plate.slice(4,6) + ' ' + plate.slice(6);
+            document.getElementById("vehicleInput").value = formatted;
+            scanStatus.innerText = "✅ Number plate detected: " + formatted;
+        } else {
+            scanStatus.innerText = "❌ Could not read. Please type manually.";
+        }
 
-            const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
-            const cleaned = text.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-
-            if (cleaned.length > 3) {
-                document.getElementById("vehicleInput").value = cleaned;
-                scanStatus.innerText = "✅ Number plate detected!";
-            } else {
-                scanStatus.innerText = "❌ Could not read. Please type manually.";
-            }
-
-            scanBtn.innerText = "📷 Scan Number Plate";
-            scanBtn.onclick = startScan;
-        };
-    }
-
-    document.getElementById("vehicleInput").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") generateToken();
-    });
+        scanBtn.innerText = "📷 Scan Number Plate";
+        scanBtn.onclick = startScan;
+    };
+}
 </script>
 
 </body>
