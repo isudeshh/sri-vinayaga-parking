@@ -489,14 +489,21 @@ async function saveToSheet(tokenNo, vehicleNumber, date, time) {
     }
 
     function resetToken() {
-        if (confirm("Are you sure you want to reset?\nThis will start token number from 0001!")) {
-            tokenNumber = 1;
-            localStorage.setItem("tokenNumber", 1);
-            updateBadge();
-            document.getElementById("tokenPreview").classList.remove("show");
-            alert("Token number reset to 0001!");
-        }
+    if (confirm("Are you sure you want to reset?\nThis will start token number from 0001!")) {
+        const now = new Date();
+        const date = now.toLocaleDateString("en-IN");
+        const time = now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
+
+        // Log new roll to Google Sheets
+        saveToSheet("🔄 NEW ROLL", "--- ROLL RESET ---", date, time);
+
+        tokenNumber = 1;
+        localStorage.setItem("tokenNumber", 1);
+        updateBadge();
+        document.getElementById("tokenPreview").classList.remove("show");
+        alert("Token number reset to 0001!");
     }
+}
 
    async function startScan() {
     const video = document.getElementById("camera");
