@@ -495,7 +495,7 @@ async function saveToSheet(tokenNo, vehicleNumber, date, time) {
         const time = now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
 
         // Log new roll to Google Sheets
-        saveToSheet("🔄 NEW ROLL", "--- ROLL RESET ---", date, time);
+        saveToSheet("NEW ROLL", "--- ROLL RESET ---", date, time);
 
         tokenNumber = 1;
         localStorage.setItem("tokenNumber", 1);
