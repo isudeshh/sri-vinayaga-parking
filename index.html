@@ -416,6 +416,12 @@
         <button class="btn-scan" id="scanBtn" onclick="startScan()">
             📷 Scan Number Plate
         </button>
+        <p id="scanCounter" style="
+        text-align: center;
+        font-size: 12px;
+        color: #b07840;
+        margin-top: 12px;">
+        </p>
 
         <video id="camera" autoplay playsinline></video>
         <canvas id="canvas"></canvas>
@@ -431,25 +437,9 @@
     </button>
 
 </div>
-
 <script>
     let tokenNumber = parseInt(localStorage.getItem("tokenNumber")) || 1;
     const SHEET_URL = "https://script.google.com/macros/s/AKfycbzwNSoxlV7OO-DwGJL82f99Au-LVQ64DVrT2FYsBdE-vY73MqRSAvo_zyu8XUFFh363/exec";
-
-async function saveToSheet(tokenNo, vehicleNumber, date, time) {
-    try {
-        await fetch(SHEET_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tokenNo, vehicleNumber, date, time })
-        });
-        console.log("Saved to Google Sheets!");
-    } catch (err) {
-        console.log("Offline — will sync later");
-    }
-}
-    updateBadge();
 
     function pad(num) {
         return String(num).padStart(4, '0');
@@ -457,6 +447,43 @@ async function saveToSheet(tokenNo, vehicleNumber, date, time) {
 
     function updateBadge() {
         document.getElementById("badgeToken").innerText = pad(tokenNumber);
+    }
+
+    function getScanCount() {
+        const month = new Date().getMonth();
+        const stored = JSON.parse(localStorage.getItem("scanData")) || { month: month, count: 0 };
+        if (stored.month !== month) {
+            localStorage.setItem("scanData", JSON.stringify({ month: month, count: 0 }));
+            return 0;
+        }
+        return stored.count;
+    }
+
+    function incrementScanCount() {
+        const month = new Date().getMonth();
+        const count = getScanCount() + 1;
+        localStorage.setItem("scanData", JSON.stringify({ month: month, count: count }));
+        updateScanBadge();
+    }
+
+    function updateScanBadge() {
+        const count = getScanCount();
+        const remaining = 2500 - count;
+        document.getElementById("scanCounter").innerText = `Scans used: ${count}/2500 (${remaining} remaining)`;
+    }
+
+    async function saveToSheet(tokenNo, vehicleNumber, date, time) {
+        try {
+            await fetch(SHEET_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tokenNo, vehicleNumber, date, time })
+            });
+            console.log("Saved to Google Sheets!");
+        } catch (err) {
+            console.log("Offline — will sync later");
+        }
     }
 
     function generateToken() {
@@ -490,87 +517,89 @@ async function saveToSheet(tokenNo, vehicleNumber, date, time) {
     }
 
     function resetToken() {
-    if (confirm("Are you sure you want to reset?\nThis will start token number from 0001!")) {
-        const now = new Date();
-        const date = now.toLocaleDateString("en-IN");
-        const time = now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
-
-        // Log new roll to Google Sheets
-        saveToSheet("NEW ROLL", "--- ROLL RESET ---", date, time);
-
-        tokenNumber = 1;
-        localStorage.setItem("tokenNumber", 1);
-        updateBadge();
-        document.getElementById("tokenPreview").classList.remove("show");
-        alert("Token number reset to 0001!");
+        if (confirm("Are you sure you want to reset?\nThis will start token number from 0001!")) {
+            const now = new Date();
+            const date = now.toLocaleDateString("en-IN");
+            const time = now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
+            saveToSheet("NEW ROLL", "ROLL RESET", date, time);
+            tokenNumber = 1;
+            localStorage.setItem("tokenNumber", 1);
+            updateBadge();
+            document.getElementById("tokenPreview").classList.remove("show");
+            alert("Token number reset to 0001!");
+        }
     }
-}
 
-   async function startScan() {
-    const video = document.getElementById("camera");
-    const scanBtn = document.getElementById("scanBtn");
-    const scanStatus = document.getElementById("scanStatus");
+    async function startScan() {
+        const video = document.getElementById("camera");
+        const scanBtn = document.getElementById("scanBtn");
+        const scanStatus = document.getElementById("scanStatus");
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }
+        });
+
+        video.srcObject = stream;
+        video.style.display = "block";
+        scanStatus.style.display = "block";
+        scanStatus.innerText = "Point camera at number plate...";
+
+        scanBtn.innerText = "📸 Capture";
+        scanBtn.onclick = async function () {
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+
+            stream.getTracks().forEach(track => track.stop());
+            video.style.display = "none";
+
+            scanStatus.innerText = "Reading number plate...";
+
+            canvas.toBlob(async function (blob) {
+                const formData = new FormData();
+                formData.append("upload", blob, "plate.jpg");
+                formData.append("regions", "in");
+
+                try {
+                    incrementScanCount();
+                    const response = await fetch("https://api.platerecognizer.com/v1/plate-reader/", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": "Token e45068806cc76c8bb1061873dc6eda2905e0b837"
+                        },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.results && result.results.length > 0) {
+                        const plate = result.results[0].plate.toUpperCase();
+                        const formatted = plate.slice(0, 2) + ' ' + plate.slice(2, 4) + ' ' + plate.slice(4, 6) + ' ' + plate.slice(6);
+                        document.getElementById("vehicleInput").value = formatted;
+                        scanStatus.innerText = "✅ Number plate detected: " + formatted;
+                    } else {
+                        scanStatus.innerText = "❌ Could not read. Please type manually.";
+                    }
+                } catch (err) {
+                    console.error(err);
+                    scanStatus.innerText = "❌ Error reading plate. Please type manually.";
+                }
+
+                scanBtn.innerText = "📷 Scan Number Plate";
+                scanBtn.onclick = startScan;
+            }, "image/jpeg");
+        };
+    }
+
+    document.getElementById("vehicleInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") generateToken();
     });
 
-    video.srcObject = stream;
-    video.style.display = "block";
-    scanStatus.style.display = "block";
-    scanStatus.innerText = "Point camera at number plate...";
-
-    scanBtn.innerText = "📸 Capture";
-    scanBtn.onclick = async function () {
-        const canvas = document.getElementById("canvas");
-        const ctx = canvas.getContext("2d");
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-
-        // Stop camera
-        stream.getTracks().forEach(track => track.stop());
-        video.style.display = "none";
-
-        scanStatus.innerText = "🔍 Reading number plate...";
-
-        // Convert canvas to blob
-        canvas.toBlob(async function(blob) {
-            const formData = new FormData();
-            formData.append("upload", blob, "plate.jpg");
-            formData.append("regions", "in");
-
-            try {
-                const response = await fetch("https://api.platerecognizer.com/v1/plate-reader/", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Token e45068806cc76c8bb1061873dc6eda2905e0b837"
-                    },
-                    body: formData
-                });
-
-                const result = await response.json();
-                console.log("Plate Recognizer result:", result);
-
-                if (result.results && result.results.length > 0) {
-                    const plate = result.results[0].plate.toUpperCase();
-                    const formatted = plate.slice(0,2) + ' ' + plate.slice(2,4) + ' ' + plate.slice(4,6) + ' ' + plate.slice(6);
-                    document.getElementById("vehicleInput").value = formatted;
-                    scanStatus.innerText = "✅ Number plate detected: " + formatted;
-                } else {
-                    scanStatus.innerText = "❌ Could not read. Please type manually.";
-                }
-            } catch (err) {
-                console.error(err);
-                scanStatus.innerText = "❌ Error reading plate. Please type manually.";
-            }
-
-            scanBtn.innerText = "📷 Scan Number Plate";
-            scanBtn.onclick = startScan;
-        }, "image/jpeg");
-    };
-}
+    updateBadge();
+    updateScanBadge();
 </script>
 
 </body>
