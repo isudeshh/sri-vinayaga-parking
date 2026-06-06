@@ -368,8 +368,12 @@
     </div>
 
     <div class="token-badge">
-        Next Token: <span id="badgeToken">0001</span>
-    </div>
+    Next Token: <span id="badgeToken">0001</span>
+</div>
+
+<div class="token-badge" style="margin-top: 8px;">
+    Today's Vehicles: <span id="dailyCount">0</span>
+</div>
 
     <!-- Token Preview -->
     <div class="token-preview" id="tokenPreview">
@@ -448,6 +452,26 @@
     function updateBadge() {
         document.getElementById("badgeToken").innerText = pad(tokenNumber);
     }
+    function getDailyCount() {
+    const today = new Date().toLocaleDateString("en-IN");
+    const stored = JSON.parse(localStorage.getItem("dailyData")) || { date: today, count: 0 };
+    if (stored.date !== today) {
+        localStorage.setItem("dailyData", JSON.stringify({ date: today, count: 0 }));
+        return 0;
+    }
+    return stored.count;
+    }
+
+    function incrementDailyCount() {
+    const today = new Date().toLocaleDateString("en-IN");
+    const count = getDailyCount() + 1;
+    localStorage.setItem("dailyData", JSON.stringify({ date: today, count: count }));
+    updateDailyBadge();
+    }
+
+    function updateDailyBadge() {
+        document.getElementById("dailyCount").innerText = getDailyCount();  
+    }
 
     function getScanCount() {
         const month = new Date().getMonth();
@@ -509,6 +533,7 @@
         preview.classList.add("flash");
 
         saveToSheet(pad(tokenNumber), vehicle, date, time);
+        incrementDailyCount();
         tokenNumber++;
         localStorage.setItem("tokenNumber", tokenNumber);
         updateBadge();
@@ -599,7 +624,8 @@
     });
 
     updateBadge();
-    updateScanBadge();
+    updateScanBadge()
+    updateDailyBadge();
 </script>
 
 </body>
