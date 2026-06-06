@@ -414,7 +414,7 @@
         <label>Vehicle Number</label>
         <div class="input-wrapper">
             <span class="input-icon">🚗</span>
-            <input type="text" id="vehicleInput" placeholder="TN 58 AB 1234" />
+            <input type="text" id="vehicleInput" placeholder="TN 99 AF 0800"/>
         </div>
 
         <button class="btn-scan" id="scanBtn" onclick="startScan()">
@@ -443,7 +443,7 @@
 </div>
 <script>
     let tokenNumber = parseInt(localStorage.getItem("tokenNumber")) || 1;
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbzwNSoxlV7OO-DwGJL82f99Au-LVQ64DVrT2FYsBdE-vY73MqRSAvo_zyu8XUFFh363/exec";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbzb6xE0waZoR4XxAQwxNk7Ev-GyfzQxHtwCympDBoI6Cpd_bvqkRCiwOG13cb1LQc9a/exec";
 
     function pad(num) {
         return String(num).padStart(4, '0');
