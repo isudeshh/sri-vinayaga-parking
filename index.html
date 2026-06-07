@@ -37,6 +37,19 @@
             text-align: center;
             margin-bottom: 32px;
             animation: fadeDown 0.8s ease;
+            width: 100%;
+        }
+
+        .date-time-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(180,100,0,0.12);
+            border-radius: 14px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
         }
 
         .ganesh-img {
@@ -398,7 +411,8 @@
         <h2 style="color: #7c3a00; font-size: 18px; font-weight: 800;">Token History</h2>
     </div>
 
-    <div style="position: relative; margin-bottom: 20px;">
+    <!-- Vehicle Search -->
+    <div style="position: relative; margin-bottom: 12px;">
         <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 18px;">🔍</span>
         <input type="text" id="historySearch" 
                placeholder="Enter vehicle number..."
@@ -418,18 +432,120 @@
                    outline: none;
                "/>
     </div>
+    <!-- Date Filter -->
+<div style="margin-bottom:12px;">
+    <label style="font-size:11px; color:#b07840; font-weight:600; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">Date</label>
+    <input type="date" id="dateFilter" onchange="searchHistory()" style="
+        width:100%;
+        padding:10px 12px;
+        font-size:14px;
+        font-family:'Inter',sans-serif;
+        background:white;
+        border:1.5px solid rgba(180,100,0,0.15);
+        border-radius:10px;
+        color:#2d1a0e;
+        outline:none;
+    "/>
+</div>
+    <!-- Time Filter -->
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <div style="flex:1;">
+            <label style="font-size:11px; color:#b07840; font-weight:600; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">From</label>
+            <select id="timeFrom" onchange="searchHistory()" style="
+                width:100%;
+                padding:10px 12px;
+                font-size:13px;
+                font-family:'Inter',sans-serif;
+                background:white;
+                border:1.5px solid rgba(180,100,0,0.15);
+                border-radius:10px;
+                color:#2d1a0e;
+                outline:none;
+            ">
+                <option value="">-- Any --</option>
+                <option value="12:00 am">12:00 AM</option>
+                <option value="1:00 am">1:00 AM</option>
+                <option value="2:00 am">2:00 AM</option>
+                <option value="3:00 am">3:00 AM</option>
+                <option value="4:00 am">4:00 AM</option>
+                <option value="5:00 am">5:00 AM</option>
+                <option value="6:00 am">6:00 AM</option>
+                <option value="7:00 am">7:00 AM</option>
+                <option value="8:00 am">8:00 AM</option>
+                <option value="9:00 am">9:00 AM</option>
+                <option value="10:00 am">10:00 AM</option>
+                <option value="11:00 am">11:00 AM</option>
+                <option value="12:00 pm">12:00 PM</option>
+                <option value="1:00 pm">1:00 PM</option>
+                <option value="2:00 pm">2:00 PM</option>
+                <option value="3:00 pm">3:00 PM</option>
+                <option value="4:00 pm">4:00 PM</option>
+                <option value="5:00 pm">5:00 PM</option>
+                <option value="6:00 pm">6:00 PM</option>
+                <option value="7:00 pm">7:00 PM</option>
+                <option value="8:00 pm">8:00 PM</option>
+                <option value="9:00 pm">9:00 PM</option>
+                <option value="10:00 pm">10:00 PM</option>
+                <option value="11:00 pm">11:00 PM</option>
+            </select>
+        </div>
+        <div style="flex:1;">
+            <label style="font-size:11px; color:#b07840; font-weight:600; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">To</label>
+            <select id="timeTo" onchange="searchHistory()" style="
+                width:100%;
+                padding:10px 12px;
+                font-size:13px;
+                font-family:'Inter',sans-serif;
+                background:white;
+                border:1.5px solid rgba(180,100,0,0.15);
+                border-radius:10px;
+                color:#2d1a0e;
+                outline:none;
+            ">
+                <option value="">-- Any --</option>
+                <option value="12:00 am">12:00 AM</option>
+                <option value="1:00 am">1:00 AM</option>
+                <option value="2:00 am">2:00 AM</option>
+                <option value="3:00 am">3:00 AM</option>
+                <option value="4:00 am">4:00 AM</option>
+                <option value="5:00 am">5:00 AM</option>
+                <option value="6:00 am">6:00 AM</option>
+                <option value="7:00 am">7:00 AM</option>
+                <option value="8:00 am">8:00 AM</option>
+                <option value="9:00 am">9:00 AM</option>
+                <option value="10:00 am">10:00 AM</option>
+                <option value="11:00 am">11:00 AM</option>
+                <option value="12:00 pm">12:00 PM</option>
+                <option value="1:00 pm">1:00 PM</option>
+                <option value="2:00 pm">2:00 PM</option>
+                <option value="3:00 pm">3:00 PM</option>
+                <option value="4:00 pm">4:00 PM</option>
+                <option value="5:00 pm">5:00 PM</option>
+                <option value="6:00 pm">6:00 PM</option>
+                <option value="7:00 pm">7:00 PM</option>
+                <option value="8:00 pm">8:00 PM</option>
+                <option value="9:00 pm">9:00 PM</option>
+                <option value="10:00 pm">10:00 PM</option>
+                <option value="11:00 pm">11:00 PM</option>
+            </select>
+        </div>
+    </div>
 
     <div id="historyResults"></div>
 </div>
 
-    <div class="header">
-        <img src="ganesh.png.png" alt="Lord Vinayaga" class="ganesh-img" />
-        <h1>Sri Vinayaga Parking</h1>
-        <p>Two Wheeler Stand — Token System</p>
+<div class="date-time-bar">
+    <div>
+        <p id="currentDate" style="font-size:12px; font-weight:700; color:#7c3a00;"></p>
+        <p id="currentDay" style="font-size:12px; color:#b07840; margin-top:2px;"></p>
     </div>
+    <p id="currentTime" style="font-size:20px; font-weight:800; color:#c45c00;"></p>
+</div>
 
-    <div class="token-badge">
-    Next Token: <span id="badgeToken">0001</span>
+<div class="header">
+    <img src="ganesh.png.png" alt="Lord Vinayaga" class="ganesh-img" />
+    <h1>Sri Vinayaga Parking</h1>
+    <p>Two Wheeler Stand</p>
 </div>
 
 <div class="token-badge" style="margin-top: 8px;">
@@ -684,11 +800,31 @@
     document.getElementById("vehicleInput").addEventListener("keypress", function (e) {
         if (e.key === "Enter") generateToken();
     });
+    function updateClock() {
+    const now = new Date();
+    
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const weekday = now.toLocaleDateString("en-IN", { weekday: 'long' });
+    const time = now.toLocaleTimeString("en-IN", { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true 
+    });
+    
+    document.getElementById("currentDate").innerText = `${day}/${month}/${year}`;
+    document.getElementById("currentDay").innerText = weekday;
+    document.getElementById("currentTime").innerText = time;
+}  
 
+    updateClock();
+    setInterval(updateClock, 1000);
     updateBadge();
     updateScanBadge()
     updateDailyBadge();
-        function toggleSearch() {
+    function toggleSearch() {
     const panel = document.getElementById("searchPanel");
     if (panel.style.display === "none") {
         panel.style.display = "block";
@@ -702,10 +838,12 @@
 
 async function searchHistory() {
     const query = document.getElementById("historySearch").value.toUpperCase().trim();
+    const timeFrom = document.getElementById("timeFrom").value;
+    const timeTo = document.getElementById("timeTo").value;
     const resultsDiv = document.getElementById("historyResults");
 
-    if (query.length < 3) {
-        resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Type at least 3 characters to search...</p>";
+    if (query.length < 3 && !timeFrom && !timeTo) {
+        resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Type at least 3 characters or select a time range...</p>";
         return;
     }
 
@@ -713,33 +851,104 @@ async function searchHistory() {
 
     try {
         const response = await fetch(SEARCH_URL + "?search=" + query);
-        const data = await response.json();
+        let data = await response.json();
+        // Filter by date if provided
+        const dateFilter = document.getElementById("dateFilter").value;
+        if (dateFilter) {
+            const selectedDate = new Date(dateFilter).toLocaleDateString("en-IN");
+            data = data.filter(record => {
+            const recordDate = formatDate(record.date);
+            return recordDate === selectedDate;
+            });
+        }
+        // Filter by time range if provided
+        if (timeFrom && timeTo) {
+            data = data.filter(record => {
+                const recordTime = record.time;
+                if (!recordTime) return false;
+
+                // Convert time to comparable format
+                const toMinutes = (t) => {
+                    if (!t) return 0;
+                    const str = String(t);
+                    const match = str.match(/(\d+):(\d+)\s*(am|pm)?/i);
+                    if (!match) return 0;
+                    let hours = parseInt(match[1]);
+                    const mins = parseInt(match[2]);
+                    const period = match[3] ? match[3].toLowerCase() : null;
+                    if (period === 'pm' && hours !== 12) hours += 12;
+                    if (period === 'am' && hours === 12) hours = 0;
+                    return hours * 60 + mins;
+                };
+
+                const recordMins = toMinutes(recordTime);
+                const fromMins = toMinutes(timeFrom);
+                const toMins = toMinutes(timeTo);
+                return recordMins >= fromMins && recordMins <= toMins;
+            });
+        }
+
+        // Format date
+        const formatDate = (val) => {
+            if (!val) return "—";
+            const str = String(val);
+            if (str.includes("T")) {
+                const d = new Date(str);
+                return d.toLocaleDateString("en-IN");
+            }
+            return str;
+        };
+
+        // Format time
+        const formatTime = (val) => {
+            if (!val) return "—";
+            const str = String(val);
+            if (str.includes("T")) {
+                const d = new Date(str);
+                return d.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
+            }
+            return str;
+        };
 
         if (data.length === 0) {
             resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>No records found.</p>";
             return;
         }
 
-        resultsDiv.innerHTML = data.reverse().map(record => `
-            <div style="
-                background: rgba(255,255,255,0.7);
-                border: 1px solid rgba(180,100,0,0.12);
-                border-radius: 16px;
-                padding: 16px 20px;
-                margin-bottom: 12px;
-                box-shadow: 0 2px 12px rgba(180,100,0,0.06);
-            ">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:22px; font-weight:800; color:#c45c00;">
-                        #${record.tokenNo}
-                    </span>
-                    <span style="font-size:13px; color:#b07840;">${record.date} ${record.time}</span>
-                </div>
-                <div style="font-size:16px; font-weight:700; color:#2d1a0e; letter-spacing:1px;">
-                    ${record.vehicleNumber}
-                </div>
+        const reversed = data.reverse();
+
+        resultsDiv.innerHTML = `
+            <p style="font-size:12px; color:#b07840; margin-bottom:12px;">${reversed.length} record(s) found</p>
+            <div style="overflow-x:auto;">
+                <table style="
+                    width:100%;
+                    border-collapse: collapse;
+                    font-family: 'Inter', sans-serif;
+                    font-size: 13px;
+                ">
+                    <thead>
+                        <tr style="background: rgba(196,92,0,0.1);">
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom: 2px solid rgba(180,100,0,0.2);">S.No</th>
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom: 2px solid rgba(180,100,0,0.2);">Token</th>
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom: 2px solid rgba(180,100,0,0.2);">Vehicle</th>
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom: 2px solid rgba(180,100,0,0.2);">Date</th>
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom: 2px solid rgba(180,100,0,0.2);">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${reversed.map((record, index) => `
+                            <tr style="border-bottom: 1px solid rgba(180,100,0,0.08); ${index % 2 === 0 ? 'background: rgba(255,255,255,0.5);' : ''}">
+                                <td style="padding:10px 8px; color:#b07840;">${index + 1}</td>
+                                <td style="padding:10px 8px; font-weight:700; color:#c45c00;">#${record.tokenNo}</td>
+                                <td style="padding:10px 8px; font-weight:600; color:#2d1a0e;">${record.vehicleNumber}</td>
+                                <td style="padding:10px 8px; color:#2d1a0e;">${formatDate(record.date)}</td>
+                                <td style="padding:10px 8px; color:#2d1a0e;">${formatTime(record.time)}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
             </div>
-        `).join("");
+        `;
 
     } catch (err) {
         resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Error fetching records. Check internet connection.</p>";
