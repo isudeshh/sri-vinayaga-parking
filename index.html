@@ -53,12 +53,13 @@
         }
 
         .ganesh-img {
-            width: 250px;
-            height: 250px;
+            width: 180px;
+            height: 180px;
             object-fit: contain;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
+            margin-top: -20px;
             filter: drop-shadow(0 4px 16px rgba(180,100,0,0.15));
-        }
+    }
 
         .header h1 {
             font-size: 22px;
@@ -120,8 +121,8 @@
         .input-icon {
             position: absolute;
             left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 0;
+            transform: translateY(0);
             font-size: 18px;
             opacity: 0.5;
         }
@@ -534,18 +535,26 @@
     <div id="historyResults"></div>
 </div>
 
-<div class="date-time-bar">
-    <div>
-        <p id="currentDate" style="font-size:12px; font-weight:700; color:#7c3a00;"></p>
-        <p id="currentDay" style="font-size:12px; color:#b07840; margin-top:2px;"></p>
+<div style="
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+    animation: fadeDown 0.8s ease;
+    text-align: center;
+">
+    <div style="
+    position: absolute;
+    left: 0;
+    top: 30px;
+    text-align: left;
+">
+        <p id="currentDate" style="font-size:13px; font-weight:800; color:#7c3a00;"></p>
+        <p id="currentDay" style="font-size:12px; color:#b07840; margin-top:4px;"></p>
+        <p id="currentTime" style="font-size:18px; font-weight:800; color:#c45c00; margin-top:6px;"></p>
     </div>
-    <p id="currentTime" style="font-size:20px; font-weight:800; color:#c45c00;"></p>
-</div>
-
-<div class="header">
     <img src="ganesh.png.png" alt="Lord Vinayaga" class="ganesh-img" />
-    <h1>Sri Vinayaga Parking</h1>
-    <p>Two Wheeler Stand</p>
+    <h1 style="font-size:16px; font-weight:800; color:#7c3a00;">Sri Vinayaga Parking</h1>
+    <p style="font-size:12px; color:#b07840;">Two Wheeler Stand</p>
 </div>
 
 <div class="token-badge" style="margin-top: 8px;">
@@ -590,7 +599,7 @@
     <div class="card">
         <label>Vehicle Number</label>
         <div class="input-wrapper">
-            <span class="input-icon">🚗</span>
+            <span class="input-icon">🏍</span>
             <input type="text" id="vehicleInput" placeholder="TN 99 AF 0800"/>
         </div>
 
