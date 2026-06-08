@@ -680,84 +680,85 @@
     }
 
     async function searchHistory() {
-        const query = document.getElementById("historySearch").value.toUpperCase().trim();
-        const timeFromHour = document.getElementById("timeFromHour").value;
-        const timeToHour = document.getElementById("timeToHour").value;
-        const timeFrom = timeFromHour ? `${timeFromHour}:00 ${fromPeriod}` : "";
-        const timeTo = timeToHour ? `${timeToHour}:00 ${toPeriod}` : "";
-        const dateFilterVal = document.getElementById("dateFilter").value;
-        const resultsDiv = document.getElementById("historyResults");
+    const query = document.getElementById("historySearch").value.toUpperCase().trim();
+    const timeFromHour = document.getElementById("timeFromHour").value;
+    const timeToHour = document.getElementById("timeToHour").value;
+    const timeFrom = timeFromHour ? `${timeFromHour}:00 ${fromPeriod}` : "";
+    const timeTo = timeToHour ? `${timeToHour}:00 ${toPeriod}` : "";
+    const dateFilterVal = document.getElementById("dateFilter").value;
+    const resultsDiv = document.getElementById("historyResults");
 
-        if (query.length < 3 && !dateFilterVal) {
-            resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Type a vehicle number or select a date...</p>";
+    if (query.length < 3 && !dateFilterVal) {
+        resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Type a vehicle number or select a date...</p>";
+        return;
+    }
+
+    resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Searching...</p>";
+
+    try {
+        const response = await fetch(SEARCH_URL + "?search=" + query, { redirect: 'follow' });
+        let data = await response.json();
+
+        // Filter by date
+        if (dateFilterVal) {
+            const selected = new Date(dateFilterVal);
+            const selectedStr1 = `${String(selected.getDate()).padStart(2,'0')}/${String(selected.getMonth()+1).padStart(2,'0')}/${selected.getFullYear()}`;
+            const selectedStr2 = `${selected.getDate()}/${selected.getMonth()+1}/${selected.getFullYear()}`;
+            data = data.filter(record => {
+                const rd = formatDate(record.date);
+                return rd === selectedStr1 || rd === selectedStr2;
+            });
+        }
+
+        // Filter by time range
+        if (timeFrom && timeTo) {
+            const fromMins = toMinutes(timeFrom);
+            const toMins = toMinutes(timeTo);
+            data = data.filter(record => {
+                const recordMins = toMinutes(record.time);
+                return recordMins >= fromMins && recordMins <= toMins;
+            });
+        }
+
+        if (data.length === 0) {
+            resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>No records found.</p>";
             return;
         }
 
-        resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Searching...</p>";
-
-        try {
-            const response = await fetch(SEARCH_URL + "?search=" + query, { redirect: 'follow' });
-            let data = await response.json();
-
-            // Filter by date
-            if (dateFilterVal) {
-                const selected = new Date(dateFilterVal);
-                const selectedStr1 = `${String(selected.getDate()).padStart(2,'0')}/${String(selected.getMonth()+1).padStart(2,'0')}/${selected.getFullYear()}`;
-                const selectedStr2 = `${selected.getDate()}/${selected.getMonth()+1}/${selected.getFullYear()}`;
-                data = data.filter(record => {
-                 const rd = formatDate(record.date);
-                 return rd === selectedStr1 || rd === selectedStr2;
-                });
-            }
-
-            // Filter by time range
-            if (timeFrom && timeTo) {
-                const fromMins = toMinutes(timeFrom);
-                const toMins = toMinutes(timeTo);
-                data = data.filter(record => {
-                    const recordMins = toMinutes(record.time);
-                    return recordMins >= fromMins && recordMins <= toMins;
-                });
-            }
-
-            if (data.length === 0) {
-                resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>No records found.</p>";
-                return;
-            }
-
-            const reversed = data.reverse();
-            resultsDiv.innerHTML = `
-                <p style="font-size:12px; color:#b07840; margin-bottom:12px;">${reversed.length} record(s) found</p>
-                <div style="overflow-x:auto;">
-                    <table style="width:100%; border-collapse:collapse; font-family:'Inter',sans-serif; font-size:13px;">
-                        <thead>
-                            <tr style="background:rgba(196,92,0,0.1);">
-                                <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">S.No</th>
-                                <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">Token</th>
-                                <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">Vehicle</th>
-                                <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">Date</th>
-                                <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">Time</th>
+        const reversed = data.reverse();
+        resultsDiv.innerHTML = `
+            <p style="font-size:12px; color:#b07840; margin-bottom:12px;">${reversed.length} record(s) found</p>
+            <div style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; font-family:'Inter',sans-serif; font-size:13px;">
+                    <thead>
+                        <tr style="background:rgba(196,92,0,0.1);">
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">S.No</th>
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">Token</th>
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">Vehicle</th>
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">Date</th>
+                            <th style="padding:10px 8px; text-align:left; color:#7c3a00; font-weight:700; border-bottom:2px solid rgba(180,100,0,0.2);">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${reversed.map((record, index) => `
+                            <tr style="border-bottom:1px solid rgba(180,100,0,0.08); ${index % 2 === 0 ? 'background:rgba(255,255,255,0.5);' : ''}">
+                                <td style="padding:10px 8px; color:#b07840;">${index + 1}</td>
+                                <td style="padding:10px 8px; font-weight:700; color:#c45c00;">#${record.tokenNo}</td>
+                                <td style="padding:10px 8px; font-weight:600; color:#2d1a0e;">${record.vehicleNumber}</td>
+                                <td style="padding:10px 8px; color:#2d1a0e;">${formatDate(record.date)}</td>
+                                <td style="padding:10px 8px; color:#2d1a0e;">${formatTime(record.time)}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${reversed.map((record, index) => `
-                                <tr style="border-bottom:1px solid rgba(180,100,0,0.08); ${index % 2 === 0 ? 'background:rgba(255,255,255,0.5);' : ''}">
-                                    <td style="padding:10px 8px; color:#b07840;">${index + 1}</td>
-                                    <td style="padding:10px 8px; font-weight:700; color:#c45c00;">#${record.tokenNo}</td>
-                                    <td style="padding:10px 8px; font-weight:600; color:#2d1a0e;">${record.vehicleNumber}</td>
-                                    <td style="padding:10px 8px; color:#2d1a0e;">${formatDate(record.date)}</td>
-                                    <td style="padding:10px 8px; color:#2d1a0e;">${formatTime(record.time)}</td>
-                                </tr>
-                            `).join("")}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
 
-        } catch (err) {
-            resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Error fetching records. Check internet connection.</p>";
-        }
+    } catch (err) {
+        console.error(err);
+        resultsDiv.innerHTML = "<p style='text-align:center; color:#b07840; font-size:13px;'>Error fetching records. Check internet connection.</p>";
     }
+}
 
     document.getElementById("vehicleInput").addEventListener("keypress", function(e) {
         if (e.key === "Enter") generateToken();
