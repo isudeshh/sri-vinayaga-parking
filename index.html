@@ -702,9 +702,12 @@
             // Filter by date
             if (dateFilterVal) {
                 const selected = new Date(dateFilterVal);
-                const selectedStr = `${String(selected.getDate()).padStart(2,'0')}/${String(selected.getMonth()+1).padStart(2,'0')}/${selected.getFullYear()}`;
-                data = data.filter(record => formatDate(record.date) === selectedStr);
-            }
+                const selectedStr1 = `${String(selected.getDate()).padStart(2,'0')}/${String(selected.getMonth()+1).padStart(2,'0')}/${selected.getFullYear()}`;
+                const selectedStr2 = `${selected.getDate()}/${selected.getMonth()+1}/${selected.getFullYear()}`;
+                data = data.filter(record => {
+                 const rd = formatDate(record.date);
+                 return rd === selectedStr1 || rd === selectedStr2;
+                });
 
             // Filter by time range
             if (timeFrom && timeTo) {
